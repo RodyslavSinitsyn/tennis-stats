@@ -29,6 +29,9 @@ type Props = {
 
 export const TennisMatch = (props: Props) => {
 
+    React.useEffect(() => {
+    }, [])
+
     const subName = (username: string) => {
         return username.length > 5
             ? username.substring(0, 5).concat(".")
@@ -37,7 +40,6 @@ export const TennisMatch = (props: Props) => {
 
     return (
         <>
-
             <TennisMatchContainer>
                 <TennisMatchText>{subName(props.match.leftPlayer)}</TennisMatchText>
                 <TennisMatchText>{props.match.leftScore}</TennisMatchText>

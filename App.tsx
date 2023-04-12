@@ -1,11 +1,13 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
-import { TennisMatchList } from './components/TennisMatchList';
-import { TennisMatchModel } from './model/Models';
-import { CreateMatchForm } from './components/CreateMatchForm';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+import { ThemeProvider } from '@rneui/themed';
 import React from 'react';
-
+import 'react-native-gesture-handler';
+import { TennisMatchModel } from './model/Models';
+import { MatchesScreen } from './screens/Matches';
+import { ProfileScreen } from './screens/Profile';
+import { NewMatchScreen } from './screens/NewMatch';
+import { StyleSheet, View } from 'react-native';
 
 let MOCK_DATA = [
   new TennisMatchModel("Радик", 11, "Леша", 10),
@@ -23,40 +25,25 @@ let MOCK_DATA = [
   new TennisMatchModel("Папа", 11, "Настя", 7),
 ]
 
+const Tab = createBottomTabNavigator();
+
 export default function App() {
 
-  React.useEffect(() => {
-    AsyncStorage.getItem('matches')
-      .then((data: string) => JSON.parse(data))
-      .then((arr: Array<TennisMatchModel>) => setItems(arr))
-      .finally(() => console.log('Items restored.'))
-  }, [])
-
-  const [items, setItems] = React.useState<TennisMatchModel[]>([])
-
-  React.useEffect(() => {
-    console.log('Matches updated')
-  }, [items])
-
-  const formSubmitHandler = (match: TennisMatchModel) => {
-    setItems(arr => [...arr, match])
-    AsyncStorage.removeItem('matches')
-      .finally(() => AsyncStorage.setItem('matches', JSON.stringify(items))
-        .finally(() => console.log('Items persisted')))
-
-  }
-
   return (
-    <View style={MAIN_STYLES.container}>
-      <CreateMatchForm onSubmit={formSubmitHandler} />
-      <TennisMatchList matches={items} />
-    </View>
+    <NavigationContainer>
+      <ThemeProvider>
+        <Tab.Navigator initialRouteName='Profile'>
+          <Tab.Screen name="Profile" component={ProfileScreen} />
+          <Tab.Screen name="Matches" component={MatchesScreen} />
+          <Tab.Screen name="NewMatch" component={NewMatchScreen} />
+        </Tab.Navigator>
+      </ThemeProvider>
+    </NavigationContainer>
   );
 }
 
 export const MAIN_STYLES = StyleSheet.create({
   container: {
-    marginTop: 75,
-    alignItems: 'center'
+    backgroundColor: 'white'
   }
 })

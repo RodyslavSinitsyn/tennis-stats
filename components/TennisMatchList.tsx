@@ -7,7 +7,6 @@ type Props = {
     matches: TennisMatchModel[];
 }
 
-
 export const TennisMatchList = (props: Props) => {
     return (
         <FlatList

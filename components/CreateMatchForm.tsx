@@ -1,29 +1,11 @@
-import React from 'react'
-import { Button, Pressable, StyleSheet, Text, TextInput } from 'react-native'
-import styled from 'styled-components/native'
-import { TennisMatchModel } from '../model/Models'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { Button, CheckBox, Input, ListItem } from '@rneui/themed';
+import React from 'react';
+import { Alert } from 'react-native';
+import { TennisMatchModel } from '../model/Models';
 
 type Props = {
     onSubmit: Function
 }
-
-const FormContainer = styled.View`
-    width: 100%;
-    height: 75px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    border-bottom-width: 3px;
-    border-bottom-color: blue;
-`
-
-const InputsContainer = styled.View`
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-`
 
 export const CreateMatchForm = (props: Props) => {
 
@@ -31,52 +13,44 @@ export const CreateMatchForm = (props: Props) => {
     const [firstScore, setFirstScore] = React.useState(0)
     const [secondScore, setSecondScore] = React.useState(0)
     const [secondPlayer, setSecondPlayer] = React.useState('')
+    const [longMatch, setLongMatch] = React.useState(false)
 
-    const handleClick = () => {
+    const [warnVisible, setWarnVisible] = React.useState(false)
+
+    const handleSubmit = () => {
+        const minScore = longMatch ? 21 : 11
         const match = new TennisMatchModel(firstPlayer, firstScore, secondPlayer, secondScore)
-        if (firstPlayer && secondPlayer && secondScore > 0 && firstScore > 0) {
-            console.log(match)
+        if (firstPlayer && secondPlayer &&
+            (secondScore === minScore || firstScore === minScore)) {
+            setFirstPlayer('')
+            setFirstScore(0)
+            setSecondScore(0)
+            setSecondPlayer('')
             props.onSubmit(match)
         } else {
-            console.error('Validation error')
+            setWarnVisible(true)
         }
     }
 
+    if (warnVisible) {
+        Alert.alert('Warning', 'Match details not completed', [
+            {
+                text: 'OK',
+                onPress: () => setWarnVisible(false)
+            }
+        ])
+    }
+
     return (
-        <FormContainer>
-            <InputsContainer>
-                <TextInput style={styles.inputField} placeholder='1st' onChangeText={text => setFirstPlayer(text)} />
-                <TextInput keyboardType='numeric' style={styles.inputField} placeholder='0' onChangeText={num => setFirstScore(parseInt(num))} />
-                <TextInput keyboardType='numeric' style={styles.inputField} placeholder='0' onChangeText={num => setSecondScore(parseInt(num))} />
-                <TextInput style={styles.inputField} placeholder='2nd' onChangeText={text => setSecondPlayer(text)} />
-            </InputsContainer>
-            <Button title='Save' onPress={handleClick}/>
-            {/* <Pressable style={styles.button} onPress={handleClick}>
-                <Text style={styles.text}>Save</Text>
-            </Pressable> */}
-        </FormContainer>
+
+        <ListItem.Content>
+            <ListItem.Title>Create new Tennis Match</ListItem.Title>
+            <Input placeholder='Player 1' value={firstPlayer} onChangeText={text => setFirstPlayer(text)} />
+            <Input keyboardType='numeric' value={firstScore.toString()} placeholder='0' onChangeText={num => setFirstScore(parseInt(num))} />
+            <Input keyboardType='numeric' value={secondScore.toString()} placeholder='0' onChangeText={num => setSecondScore(parseInt(num))} />
+            <Input placeholder='Player 2' value={secondPlayer} onChangeText={text => setSecondPlayer(text)} />
+            <CheckBox checked={longMatch} size={32} title='Длинная партия' onPress={() => setLongMatch(v => !v)} />
+            <Button title='Save' onPress={handleSubmit} />
+        </ListItem.Content>
     )
 }
-
-export const styles = StyleSheet.create({
-    inputField: {
-        fontSize: 25,
-        borderBottomColor: 'blue',
-        borderBottomWidth: 3
-    },
-    button: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 5,
-        paddingHorizontal: 15,
-        borderRadius: 4,
-        elevation: 3,
-        backgroundColor: 'blue',
-    },
-    text: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        letterSpacing: 0.25,
-        color: 'white',
-    }
-})
